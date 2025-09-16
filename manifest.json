@@ -1,0 +1,17 @@
+﻿{
+  "manifest_version": 3,
+  "name": "HFC Safety Sidecar",
+  "version": "0.1.0",
+  "description": "Context-aware Safety tools (JHA/AHA, SDS) over existing web apps.",
+  "permissions": ["contextMenus", "activeTab", "storage", "sidePanel"],
+  "host_permissions": [
+    "https://*.acumatica.com/*",
+    "https://app.asana.com/*",
+    "https://*.sharepoint.com/*",
+    "https://<orchestrator>.onrender.com/*",
+    "https://safety.hurricanefenceinc.com/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "action": { "default_title": "HFC Safety" }
+}

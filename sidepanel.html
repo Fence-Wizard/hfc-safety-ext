@@ -1,0 +1,36 @@
+﻿<!doctype html><html><head>
+<meta charset="utf-8"/><title>HFC Safety</title>
+<style>body{font:14px system-ui;margin:12px}.btn{padding:6px 10px;border:1px solid #ccc;border-radius:8px;cursor:pointer;margin-right:8px}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}</style>
+</head><body>
+<h3>HFC Safety</h3>
+<div id="content">No data yet. Select text and use the right-click menu.</div>
+<div style="margin-top:12px">
+  <button class="btn" id="postSlack">Post to Slack</button>
+  <button class="btn" id="openPortal">Open in Portal</button>
+</div>
+<script>
+(async function(){
+  const st=await chrome.storage.session.get(["lastSafetyDoc","lastSdsResults","hfcToken"]);
+  const el=document.getElementById("content");
+  if(st.lastSafetyDoc){
+    const d=st.lastSafetyDoc;
+    el.innerHTML=`<div><b>JHA for:</b> <span class="mono">${d.task||""}</span></div>
+                  <div><b>PPE:</b> ${(d.ppe||[]).join(", ")}</div>
+                  <div><b>Controls:</b> ${(d.controls||[]).join(", ")}</div>`;
+  } else if(st.lastSdsResults){
+    const r=st.lastSdsResults;
+    const items=(r.results||[]).map(x=>` ${x.product}  <a href="${x.pdf_hint}" target="_blank">PDF</a>`).join("<br/>");
+    el.innerHTML=`<div><b>SDS results for:</b> <span class="mono">${r.query||""}</span></div>${items||"No matches."}`;
+  } else { el.textContent="No data yet. Select text and use the context menu."; }
+
+  document.getElementById("postSlack").onclick=async()=>{
+    if(!st.hfcToken||!st.lastSafetyDoc){alert("Nothing to post.");return;}
+    await fetch("https://<orchestrator>.onrender.com/ext/notify/slack",{method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":`Bearer ${st.hfcToken}`},
+      body:JSON.stringify({kind:"jha",payload:st.lastSafetyDoc})});
+    alert("Posted to Slack.");
+  };
+  document.getElementById("openPortal").onclick=()=>{window.open("https://portal.hurricanefenceinc.com/safety/jha/recent","_blank");};
+})();
+</script>
+</body></html>
